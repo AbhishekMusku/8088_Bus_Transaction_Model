@@ -98,7 +98,7 @@ RESET = '1;
 repeat (5) @(posedge CLK);
 RESET = '0;
 
-repeat(1000) @(posedge CLK);
+repeat(10000) @(posedge CLK);
 $finish();
 end
 
