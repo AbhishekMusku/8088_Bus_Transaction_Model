@@ -13,7 +13,7 @@ module MemoryIO (
 );
     reg OE, Write, LoadAddress;
     reg [0:19] Address;
-   //parameter t=0;
+   parameter mod_sel=0;
 
     // Define states for FSM
     typedef enum logic [4:0] {
@@ -39,6 +39,10 @@ module MemoryIO (
     logic  [7:0] dataout;
 	reg t;
 
+wire IO0_range, IO1_range; 
+
+assign IO0_range= Address >= 20'hFF00 && Address <= 20'hFF0F;
+assign IO1_range= Address >= 20'h1C00 && Address <= 20'h1DFF;
 assign m0 = memory0[Address];
 assign m1 =memory1[Address];
 assign I0 = IO0[Address];
@@ -121,17 +125,17 @@ end
 	
 
     always_comb begin
-        if (!cs && OE && !t)  // Read operation
+        if (!cs && OE && !t && mod_sel==0)  // Read operation
             dataout = memory0[Address];
-        else if (cs && OE && !t)  begin// Read operation
+        else if (cs && OE && !t && mod_sel==1)  begin// Read operation
             dataout = memory1[Address];
 			$display("dataout= %h memory1[Address] = %h",dataout,memory1[Address]);
 			end
-        else if (OE && t) begin
-            if (Address >= 20'hFF00 && Address <= 20'hFF0F) begin
+        else if (OE && t ) begin
+            if (IO0_range && mod_sel==2) begin
                 dataout = IO0[Address];
-				$display("dataout = %h IO0{add]=%h",dataout,IO0[Address]); end
-            else if (Address >= 20'h1C00 && Address <= 20'h1DFF) // Read operation
+			end
+            else if (IO1_range && mod_sel==3) // Read operation
                 dataout = IO1[Address];
         end else
             dataout = 8'hZZ; // Tri-state output when not selected
@@ -139,14 +143,14 @@ end
 
     // Data input logic for write operation
     always_comb begin
-        if (!cs && Write && !t)  // Write operation
+        if (!cs && Write && !t &&  mod_sel==0)  // Write operation
             memory0[Address] = data;
-        else if (cs && Write && !t) // Write operation
+        else if (cs && Write && !t && mod_sel==1) // Write operation
             memory1[Address] = data;
         else if (Write && t) begin
-            if (Address >= 20'hFF00 && Address <= 20'hFF0F)
+            if (IO0_range && mod_sel==2)
                 IO0[Address] = data;
-            else if (Address >= 20'h1C00 && Address <= 20'h1DFF) // Write operation
+            else if (IO1_range && mod_sel==3) // Write operation
                 IO1[Address] = data;
         end
     end
