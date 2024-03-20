@@ -55,6 +55,11 @@ endinterface
 
 module top;
 
+parameter mem0 =0;
+parameter mem1 =1;
+parameter IO0 =2;
+parameter IO1 =3;
+
 bit CLK ='1;
 bit RESET = '0;
 bit CS ;
@@ -67,9 +72,10 @@ Intel8088Pins p1(CLK, RESET);
 Intel8088 p(p1.Processor);
 
 //Intel8088 P(CLK, MNMX, TEST, RESET, READY, NMI, INTR, HOLD, AD, A, HLDA, IOM, WR, RD, SSO, INTA, ALE, DTR, DEN);
-MemoryIO   M(CLK,RESET, p1.ALE, p1.IOM, CS, p1.RD, p1.WR, p1.DEN, Address, Data );
-MemoryIO1   M1(CLK,RESET, p1.ALE, p1.IOM, p1.RD, p1.WR, p1.DEN, Address, Data );
-//MemoryIO #(1)  M1(CLK,RESET, ALE, 1'b1, RD, WR, DEN, Address, Data );
+MemoryIO #(mem0)  M(CLK,RESET, p1.ALE, p1.IOM, CS, p1.RD, p1.WR, p1.DEN, Address, Data );
+MemoryIO #(mem1)  M1(CLK,RESET, p1.ALE, p1.IOM, CS, p1.RD, p1.WR, p1.DEN, Address, Data );
+MemoryIO #(IO0)  M2(CLK,RESET, p1.ALE, p1.IOM, CS, p1.RD, p1.WR, p1.DEN, Address, Data );
+MemoryIO #(IO1)  M3(CLK,RESET, p1.ALE, p1.IOM, CS, p1.RD, p1.WR, p1.DEN, Address, Data );
 
 
 
@@ -98,7 +104,7 @@ RESET = '1;
 repeat (5) @(posedge CLK);
 RESET = '0;
 
-repeat(10000) @(posedge CLK);
+repeat(1000) @(posedge CLK);
 $finish();
 end
 
